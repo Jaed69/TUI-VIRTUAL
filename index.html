@@ -345,6 +345,186 @@
     #install-banner.show { 
       display: flex;                 /* Visualiza como flexbox */
     }
+
+    /* ═════════════════════════════════════════════════════════════════*/
+    /* PANEL DE CONFIGURACIÓN (overlay modal) */
+    /* ═════════════════════════════════════════════════════════════════*/
+    .config-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+    .config-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .config-panel {
+      background: #fff;
+      border-radius: 20px;
+      width: 92%;
+      max-width: 380px;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 24px 20px 20px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+    }
+
+    .config-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+    .config-header h3 {
+      font-size: 19px;
+      font-weight: 700;
+      color: var(--dark);
+    }
+    .config-close {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #888;
+      padding: 4px 8px;
+      line-height: 1;
+    }
+
+    .config-photo-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+    .config-photo-preview {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #ddd;
+      flex-shrink: 0;
+    }
+    .config-photo-btn {
+      font-size: 13px;
+      padding: 8px 16px;
+      background: var(--clock-bg);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      color: var(--navy);
+      font-weight: 600;
+    }
+
+    .config-field {
+      margin-bottom: 12px;
+    }
+    .config-field label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: #6c7c99;
+      margin-bottom: 3px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .config-field input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1.5px solid #ddd;
+      border-radius: 10px;
+      font-size: 15px;
+      color: var(--dark);
+      background: #f8f9fb;
+      transition: border 0.2s;
+    }
+    .config-field input:focus {
+      outline: none;
+      border-color: var(--red);
+      background: #fff;
+    }
+
+    /* Toggle switch */
+    .config-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 16px 0;
+      padding: 10px 0;
+      border-top: 1px solid #eee;
+      border-bottom: 1px solid #eee;
+    }
+    .config-toggle span {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--navy);
+    }
+    .toggle-switch {
+      position: relative;
+      width: 48px;
+      height: 26px;
+      flex-shrink: 0;
+    }
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .toggle-slider {
+      position: absolute;
+      inset: 0;
+      background: #ccc;
+      border-radius: 26px;
+      cursor: pointer;
+      transition: background 0.25s;
+    }
+    .toggle-slider::before {
+      content: "";
+      position: absolute;
+      height: 20px;
+      width: 20px;
+      left: 3px;
+      bottom: 3px;
+      background: #fff;
+      border-radius: 50%;
+      transition: transform 0.25s;
+    }
+    .toggle-switch input:checked + .toggle-slider {
+      background: var(--red);
+    }
+    .toggle-switch input:checked + .toggle-slider::before {
+      transform: translateX(22px);
+    }
+
+    .config-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 18px;
+    }
+    .config-actions button {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .btn-save {
+      background: var(--red);
+      color: #fff;
+    }
+    .btn-reset {
+      background: #f0f0f0;
+      color: #666;
+    }
   </style>
 </head>
 <body>
@@ -399,123 +579,259 @@
 
 <div id="install-banner">📲 Agregar a pantalla de inicio</div>
 
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- PANEL DE CONFIGURACIÓN (se abre con long-press en la foto) -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="config-overlay" id="config-overlay">
+  <div class="config-panel">
+    <div class="config-header">
+      <h3>⚙️ Configuración</h3>
+      <button class="config-close" id="config-close">&times;</button>
+    </div>
+
+    <div class="config-photo-row">
+      <img class="config-photo-preview" id="config-photo-preview" src="" alt="Foto" />
+      <label class="config-photo-btn">
+        📷 Cambiar foto
+        <input type="file" accept="image/*" id="config-photo-input" style="display:none" />
+      </label>
+    </div>
+
+    <div class="config-field">
+      <label>Nombre</label>
+      <input type="text" id="cfg-nombre" placeholder="Nombre completo" />
+    </div>
+    <div class="config-field">
+      <label>Primer apellido</label>
+      <input type="text" id="cfg-apellido1" placeholder="Primer apellido" />
+    </div>
+    <div class="config-field">
+      <label>Segundo apellido</label>
+      <input type="text" id="cfg-apellido2" placeholder="Segundo apellido" />
+    </div>
+    <div class="config-field">
+      <label>Código de alumno</label>
+      <input type="text" id="cfg-codigo" placeholder="Código" />
+    </div>
+    <div class="config-field">
+      <label>ID Banner</label>
+      <input type="text" id="cfg-banner" placeholder="ID Banner" />
+    </div>
+    <div class="config-field">
+      <label>Carrera</label>
+      <input type="text" id="cfg-carrera" placeholder="Carrera" />
+    </div>
+    <div class="config-field">
+      <label>Campus</label>
+      <input type="text" id="cfg-campus" placeholder="Campus" />
+    </div>
+
+    <div class="config-toggle">
+      <span>Mostrar apellidos completos</span>
+      <label class="toggle-switch">
+        <input type="checkbox" id="cfg-mostrar-completos" />
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+
+    <div class="config-actions">
+      <button class="btn-reset" id="config-reset">↺ Restaurar</button>
+      <button class="btn-save" id="config-save">✓ Guardar</button>
+    </div>
+  </div>
+</div>
+
 <script>
   /* ═════════════════════════════════════════════════════════════════*/
-  /* DATOS DEL ALUMNO (objeto con información personal del estudiante) */
+  /* DATOS POR DEFECTO (si no hay nada guardado en localStorage) */
   /* ═════════════════════════════════════════════════════════════════*/
-  const DATOS = {
-    nombre:    "PEPITO ROMPECUNAS",        /* Nombre principal del alumno */
-    apellido1: "DE LA CRUZ",              /* Primer apellido */
-    apellido2: "UGARTE",          /* Segundo apellido */
-    codigo:    "202310456",           /* Código de estudiante único */
-    id_banner: "N04080409",           /* ID del sistema Banner */
-    carrera:   "DISEÑO PROFESIONAL GRÁFICO",  /* Programa académico */
-    campus:    "Campus San Miguel",  /* Ubicación del campus */
+  const DEFAULTS = {
+    nombre:    "PEPITO ROMPECUNAS",
+    apellido1: "DE LA CRUZ",
+    apellido2: "UGARTE",
+    codigo:    "202310456",
+    id_banner: "N04080409",
+    carrera:   "DISEÑO PROFESIONAL GRÁFICO",
+    campus:    "Campus San Miguel",
   };
+  const DEFAULT_PHOTO = document.querySelector(".photo-wrap img").src;
+  let mostrarCompletos = false;
+  let fotoActual = DEFAULT_PHOTO;
 
   /* ═════════════════════════════════════════════════════════════════*/
   /* FUNCIÓN DE CENSURA (enmascara apellidos por privacidad) */
   /* ═════════════════════════════════════════════════════════════════*/
-  /* Parámetro t: texto a censurar */
-  /* Retorna: primer carácter + "***" para textos largos */
-  /* Ejemplo: "PUYEN" se convierte en "P***" */
   function censurar(t) { return t.length <= 1 ? t : t[0] + "***"; }
 
   /* ═════════════════════════════════════════════════════════════════*/
-  /* RELLENO DE ELEMENTOS DEL DOM CON DATOS DEL ALUMNO */
+  /* APLICAR DATOS AL DOM (rellena todos los campos visibles) */
   /* ═════════════════════════════════════════════════════════════════*/
-  /* Busca elementos HTML por su id y asigna contenido del objeto DATOS */
-  
-  /* Primera línea del nombre: nombre principal */
-  document.getElementById("nombre-linea1").textContent = DATOS.nombre;
-  
-  /* Segunda línea: apellidos censurados (privacidad: P*** R***) */
-  document.getElementById("nombre-linea2").textContent = censurar(DATOS.apellido1) + " " + censurar(DATOS.apellido2);
-  
-  /* Código de alumno (matrícula/expediente) */
-  document.getElementById("codigo").textContent  = DATOS.codigo;
-  
-  /* ID en sistema Banner */
-  document.getElementById("banner").textContent  = DATOS.id_banner;
-  
-  /* Carrera/programa académico */
-  document.getElementById("carrera").textContent = DATOS.carrera;
-  
-  /* Campus (ubicación geográfica) */
-  document.getElementById("campus").textContent  = DATOS.campus;
+  function aplicarDatos(d) {
+    document.getElementById("nombre-linea1").textContent = d.nombre;
+    const ap1 = mostrarCompletos ? d.apellido1 : censurar(d.apellido1);
+    const ap2 = mostrarCompletos ? d.apellido2 : censurar(d.apellido2);
+    document.getElementById("nombre-linea2").textContent = ap1 + " " + ap2;
+    document.getElementById("codigo").textContent  = d.codigo;
+    document.getElementById("banner").textContent  = d.id_banner;
+    document.getElementById("carrera").textContent = d.carrera;
+    document.getElementById("campus").textContent  = d.campus;
+    document.querySelector(".photo-wrap img").src = fotoActual;
+  }
+
+  /* ═════════════════════════════════════════════════════════════════*/
+  /* CARGA INICIAL: localStorage o defaults */
+  /* ═════════════════════════════════════════════════════════════════*/
+  const saved = localStorage.getItem("tiu_config");
+  let DATOS;
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved);
+      DATOS = parsed.datos ? { ...DEFAULTS, ...parsed.datos } : { ...DEFAULTS };
+      fotoActual = parsed.foto || DEFAULT_PHOTO;
+      mostrarCompletos = parsed.mostrarCompletos || false;
+    } catch (e) {
+      DATOS = { ...DEFAULTS };
+    }
+  } else {
+    DATOS = { ...DEFAULTS };
+  }
+  aplicarDatos(DATOS);
 
   /* ═════════════════════════════════════════════════════════════════*/
   /* ARREGLOS PARA LOCALIZACIÓN EN ESPAÑOL */
   /* ═════════════════════════════════════════════════════════════════*/
-  /* Nombres de días de la semana en español (domingo=0, lunes=1, etc) */
   const DIAS  = ["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"];
-  
-  /* Abreviaturas de meses en español (enero=0, febrero=1, etc) */
   const MESES = ["Ene.","Feb.","Mar.","Abr.","May.","Jun.","Jul.","Ago.","Sep.","Oct.","Nov.","Dic."];
 
   /* ═════════════════════════════════════════════════════════════════*/
   /* FUNCIÓN DE ACTUALIZACIÓN DE RELOJ Y FECHA (tick) */
   /* ═════════════════════════════════════════════════════════════════*/
-  /* Se ejecuta cada segundo para mantener la hora actualizada en tiempo real */
   function tick() {
-    /* Obtiene la fecha/hora actual del sistema operativo */
     const now = new Date();
-    
-    /* ACTUALIZAR DISPLAY DE HORA (HH:MM:SS) */
-    /* padStart(2,"0") asegura formato de dos dígitos con cero adelante */
-    /* Ejemplo: 9:5:8 se convierte en 09:05:08 */
     document.getElementById("clock").textContent =
-      String(now.getHours()).padStart(2,"0")+":"+      /* Horas 00-23 */
-      String(now.getMinutes()).padStart(2,"0")+":"+    /* Minutos 00-59 */
-      String(now.getSeconds()).padStart(2,"0");         /* Segundos 00-59 */
-    
-    /* ACTUALIZAR DISPLAY DE FECHA (Día, fecha mes año) */
-    /* Formato de ejemplo: "Lunes, 15 Ene. 2024" */
+      String(now.getHours()).padStart(2,"0")+":"+
+      String(now.getMinutes()).padStart(2,"0")+":"+
+      String(now.getSeconds()).padStart(2,"0");
     document.getElementById("fecha").textContent =
-      DIAS[now.getDay()]+", "+                 /* Nombre del día de la semana */
-      now.getDate()+" "+                       /* Número del día (1-31) */
-      MESES[now.getMonth()]+" "+               /* Abreviatura del mes */
-      now.getFullYear();                       /* Año completo (ej: 2024) */
+      DIAS[now.getDay()]+", "+
+      now.getDate()+" "+
+      MESES[now.getMonth()]+" "+
+      now.getFullYear();
   }
-  
-  /* Ejecutar tick() una vez inmediatamente para mostrar hora inicial */
-  tick(); 
-  
-  /* Ejecutar tick() cada 1000ms (1 segundo) para actualización continua */
+  tick();
   setInterval(tick, 1000);
 
   /* ═════════════════════════════════════════════════════════════════*/
   /* PWA (PROGRESSIVE WEB APP) - INSTALACIÓN EN PANTALLA DE INICIO */
   /* ═════════════════════════════════════════════════════════════════*/
-  
-  /* Variable para almacenar el evento defer prompts (instalación diferida) */
   let deferredPrompt;
-  
-  /* Obtener referencia al elemento div que contiene el banner de instalación */
   const banner = document.getElementById("install-banner");
-  
-  /* EVENTO: beforeinstallprompt (disparado cuando el navegador permite instalar) */
   window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); deferredPrompt=e; banner.classList.add("show"); });
-  
-  /* EVENTO: click (cuando el usuario hace click en el banner para instalar) */
   banner.addEventListener("click", async () => {
-    if (!deferredPrompt) return;               /* Si no hay permiso guardado, no hacer nada */
-    deferredPrompt.prompt();                   /* Mostrar el diálogo nativo de instalación */
-    const { outcome } = await deferredPrompt.userChoice;  /* Esperar respuesta del usuario */
-    if (outcome==="accepted") banner.classList.remove("show");  /* Ocultar si aceptó */
-    deferredPrompt=null;                       /* Limpiar referencia para prevenir dobles usos */
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome==="accepted") banner.classList.remove("show");
+    deferredPrompt=null;
   });
-  
-  /* EVENTO: appinstalled (se dispara después de instalación exitosa) */
-  window.addEventListener("appinstalled", () => banner.classList.remove("show"));  /* Ocultar banner después de instalar */
-  
+  window.addEventListener("appinstalled", () => banner.classList.remove("show"));
+
   /* ═════════════════════════════════════════════════════════════════*/
-  /* SERVICE WORKER - SOPORTE OFFLINE Y MEJORA DE PERFORMANCE */
+  /* SERVICE WORKER - SOPORTE OFFLINE */
   /* ═════════════════════════════════════════════════════════════════*/
-  /* Registrar el service worker si el navegador lo soporta */
-  /* El service worker (sw.js) maneja cache, funcionalidad offline, etc. */
-  if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(()=>{});  /* Ignorar errores de registro */
-</script>
+  if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(()=>{});
+
+  /* ═════════════════════════════════════════════════════════════════*/
+  /* PANEL DE CONFIGURACIÓN (long-press en foto para abrir) */
+  /* ═════════════════════════════════════════════════════════════════*/
+  const overlay = document.getElementById("config-overlay");
+  const photoWrap = document.querySelector(".photo-wrap");
+  let pressTimer = null;
+
+  function abrirPanel() {
+    document.getElementById("cfg-nombre").value     = DATOS.nombre;
+    document.getElementById("cfg-apellido1").value  = DATOS.apellido1;
+    document.getElementById("cfg-apellido2").value  = DATOS.apellido2;
+    document.getElementById("cfg-codigo").value     = DATOS.codigo;
+    document.getElementById("cfg-banner").value     = DATOS.id_banner;
+    document.getElementById("cfg-carrera").value    = DATOS.carrera;
+    document.getElementById("cfg-campus").value     = DATOS.campus;
+    document.getElementById("cfg-mostrar-completos").checked = mostrarCompletos;
+    document.getElementById("config-photo-preview").src = fotoActual;
+    overlay.classList.add("open");
+  }
+
+  function cerrarPanel() {
+    overlay.classList.remove("open");
+  }
+
+  function guardarConfig() {
+    DATOS.nombre     = document.getElementById("cfg-nombre").value;
+    DATOS.apellido1  = document.getElementById("cfg-apellido1").value;
+    DATOS.apellido2  = document.getElementById("cfg-apellido2").value;
+    DATOS.codigo     = document.getElementById("cfg-codigo").value;
+    DATOS.id_banner  = document.getElementById("cfg-banner").value;
+    DATOS.carrera    = document.getElementById("cfg-carrera").value;
+    DATOS.campus     = document.getElementById("cfg-campus").value;
+    mostrarCompletos = document.getElementById("cfg-mostrar-completos").checked;
+
+    localStorage.setItem("tiu_config", JSON.stringify({
+      datos: DATOS,
+      foto: fotoActual,
+      mostrarCompletos: mostrarCompletos
+    }));
+    aplicarDatos(DATOS);
+    cerrarPanel();
+  }
+
+  function restaurarDefaults() {
+    localStorage.removeItem("tiu_config");
+    DATOS = { ...DEFAULTS };
+    fotoActual = DEFAULT_PHOTO;
+    mostrarCompletos = false;
+    aplicarDatos(DATOS);
+    cerrarPanel();
+  }
+
+  /* Long-press en la foto (touch + mouse) */
+  function iniciarLongPress(e) {
+    e.preventDefault();
+    pressTimer = setTimeout(abrirPanel, 500);
+  }
+  function cancelarLongPress() {
+    if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
+  }
+
+  photoWrap.addEventListener("touchstart", iniciarLongPress, { passive: false });
+  photoWrap.addEventListener("touchend", cancelarLongPress);
+  photoWrap.addEventListener("touchmove", cancelarLongPress);
+  photoWrap.addEventListener("touchcancel", cancelarLongPress);
+  photoWrap.addEventListener("mousedown", iniciarLongPress);
+  photoWrap.addEventListener("mouseup", cancelarLongPress);
+  photoWrap.addEventListener("mouseleave", cancelarLongPress);
+  photoWrap.addEventListener("mousemove", cancelarLongPress);
+
+  /* Cerrar panel */
+  document.getElementById("config-close").addEventListener("click", cerrarPanel);
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) cerrarPanel();
+  });
+
+  /* Botones guardar / restaurar */
+  document.getElementById("config-save").addEventListener("click", guardarConfig);
+  document.getElementById("config-reset").addEventListener("click", restaurarDefaults);
+
+  /* Subir foto nueva (convierte a base64) */
+  document.getElementById("config-photo-input").addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      fotoActual = ev.target.result;
+      document.getElementById("config-photo-preview").src = fotoActual;
+    };
+    reader.readAsDataURL(file);
+  });
 </script>
 </body>
 </html>
