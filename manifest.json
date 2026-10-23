@@ -4,6 +4,7 @@
   "description": "Carnet virtual de estudiante",
   "start_url": "./",
   "display": "standalone",
+  "display_override": ["fullscreen", "standalone"],
   "background_color": "#F9FAFE",
   "theme_color": "#F9FAFE",
   "orientation": "portrait",

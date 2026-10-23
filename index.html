@@ -139,6 +139,22 @@
     }
 
     /* ═══════════════════════════════════════════════════════════════*/
+    /* BOTÓN PANTALLA COMPLETA (⛶ en la barra superior) */
+    /* ═══════════════════════════════════════════════════════════════*/
+    .fs-btn {
+      background: none;              /* Sin fondo */
+      border: none;                  /* Sin borde */
+      cursor: pointer;               /* Cursor de mano */
+      padding: 4px 0 4px 8px;        /* Relleno interno */
+      display: flex;                 /* Flexbox para alinear SVG */
+      margin-left: auto;             /* Empuja el botón a la derecha */
+    }
+    .fs-btn svg { 
+      width: 26px;                   /* Ancho del ícono */
+      height: 26px;                  /* Alto del ícono */
+    }
+
+    /* ═══════════════════════════════════════════════════════════════*/
     /* ZONA CENTRAL QUE CRECE DINÁMICAMENTE */
     /* ═══════════════════════════════════════════════════════════════*/
     .content {
@@ -554,6 +570,11 @@
       </svg>
     </button>
     <h1>TIU VIRTUAL</h1>
+    <button class="fs-btn" id="fs-btn" aria-label="Pantalla completa" title="Pantalla completa">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#c62828" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/>
+      </svg>
+    </button>
   </div>
 
   <div class="content">
@@ -757,8 +778,6 @@
   /* PANEL DE CONFIGURACIÓN (long-press en foto para abrir) */
   /* ═════════════════════════════════════════════════════════════════*/
   const overlay = document.getElementById("config-overlay");
-  const photoWrap = document.querySelector(".photo-wrap");
-  let pressTimer = null;
 
   function abrirPanel() {
     document.getElementById("cfg-nombre").value     = DATOS.nombre;
@@ -806,28 +825,39 @@
   }
 
   /* ═════════════════════════════════════════════════════════════════*/
-  /* ABRIR PANEL CON UN CLIC/TAP (foto y tarjeta de datos) */
+  /* PANTALLA COMPLETA (botón ⛶; se oculta si el navegador no lo soporta) */
   /* ═════════════════════════════════════════════════════════════════*/
-  document.getElementById("foto-alumno").addEventListener("click", abrirPanel);
-  document.getElementById("tarjeta-datos").addEventListener("click", abrirPanel);
-
-  /* Long-press en la foto (touch + mouse), se conserva como opción.
-     Nota: sin preventDefault para no bloquear el evento click/tap en móviles. */
-  function iniciarLongPress(e) {
-    pressTimer = setTimeout(abrirPanel, 500);
+  const fsBtn = document.getElementById("fs-btn");
+  const fsRoot = document.documentElement;
+  function estaPantallaCompleta() {
+    return document.fullscreenElement || document.webkitFullscreenElement;
   }
-  function cancelarLongPress() {
-    if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
+  fsBtn.addEventListener("click", () => {
+    if (!estaPantallaCompleta()) {
+      const pedir = fsRoot.requestFullscreen || fsRoot.webkitRequestFullscreen;
+      if (pedir) pedir.call(fsRoot).catch(() => {});
+    } else {
+      const salir = document.exitFullscreen || document.webkitExitFullscreen;
+      if (salir) salir.call(document).catch(() => {});
+    }
+  });
+  /* iPhone Safari (en el navegador) no permite pantalla completa: ocultar botón */
+  if (!fsRoot.requestFullscreen && !fsRoot.webkitRequestFullscreen) {
+    fsBtn.style.display = "none";
   }
 
-  photoWrap.addEventListener("touchstart", iniciarLongPress, { passive: false });
-  photoWrap.addEventListener("touchend", cancelarLongPress);
-  photoWrap.addEventListener("touchmove", cancelarLongPress);
-  photoWrap.addEventListener("touchcancel", cancelarLongPress);
-  photoWrap.addEventListener("mousedown", iniciarLongPress);
-  photoWrap.addEventListener("mouseup", cancelarLongPress);
-  photoWrap.addEventListener("mouseleave", cancelarLongPress);
-  photoWrap.addEventListener("mousemove", cancelarLongPress);
+  /* ═════════════════════════════════════════════════════════════════*/
+  /* ABRIR PANEL CON UN TAP (finger/cursor sobre la foto o la tarjeta) */
+  /* ═════════════════════════════════════════════════════════════════*/
+  const fotoAlumno = document.getElementById("foto-alumno");
+  const tarjetaDatos = document.getElementById("tarjeta-datos");
+  fotoAlumno.addEventListener("click", abrirPanel);
+  tarjetaDatos.addEventListener("click", abrirPanel);
+
+  /* Al mantener presionado (long-press) evita el menú del navegador sobre la imagen */
+  [fotoAlumno, tarjetaDatos].forEach(el => {
+    el.addEventListener("contextmenu", (e) => e.preventDefault());
+  });
 
   /* Cerrar panel */
   document.getElementById("config-close").addEventListener("click", cerrarPanel);
