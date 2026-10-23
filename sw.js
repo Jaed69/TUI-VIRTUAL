@@ -1,4 +1,4 @@
-const CACHE_NAME = "tiu-cache-v3";
+const CACHE_NAME = "tiu-cache-v4";
 
 // Archivos clave que se guardarán en el celular para funcionar sin internet
 const ASSETS_TO_CACHE = [

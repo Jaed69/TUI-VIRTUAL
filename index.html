@@ -139,22 +139,6 @@
     }
 
     /* ═══════════════════════════════════════════════════════════════*/
-    /* BOTÓN PANTALLA COMPLETA (⛶ en la barra superior) */
-    /* ═══════════════════════════════════════════════════════════════*/
-    .fs-btn {
-      background: none;              /* Sin fondo */
-      border: none;                  /* Sin borde */
-      cursor: pointer;               /* Cursor de mano */
-      padding: 4px 0 4px 8px;        /* Relleno interno */
-      display: flex;                 /* Flexbox para alinear SVG */
-      margin-left: auto;             /* Empuja el botón a la derecha */
-    }
-    .fs-btn svg { 
-      width: 26px;                   /* Ancho del ícono */
-      height: 26px;                  /* Alto del ícono */
-    }
-
-    /* ═══════════════════════════════════════════════════════════════*/
     /* ZONA CENTRAL QUE CRECE DINÁMICAMENTE */
     /* ═══════════════════════════════════════════════════════════════*/
     .content {
@@ -570,11 +554,6 @@
       </svg>
     </button>
     <h1>TIU VIRTUAL</h1>
-    <button class="fs-btn" id="fs-btn" aria-label="Pantalla completa" title="Pantalla completa">
-      <svg viewBox="0 0 24 24" fill="none" stroke="#c62828" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/>
-      </svg>
-    </button>
   </div>
 
   <div class="content">
@@ -825,26 +804,36 @@
   }
 
   /* ═════════════════════════════════════════════════════════════════*/
-  /* PANTALLA COMPLETA (botón ⛶; se oculta si el navegador no lo soporta) */
+  /* PANTALLA COMPLETA DISIMULADA (doble toque en el reloj) */
+  /* Sin botones visibles: la pantalla se mantiene limpia. */
   /* ═════════════════════════════════════════════════════════════════*/
-  const fsBtn = document.getElementById("fs-btn");
   const fsRoot = document.documentElement;
   function estaPantallaCompleta() {
     return document.fullscreenElement || document.webkitFullscreenElement;
   }
-  fsBtn.addEventListener("click", () => {
+  function alternarPantallaCompleta() {
+    if (!fsRoot.requestFullscreen && !fsRoot.webkitRequestFullscreen) return; /* iPhone: sin API, no hace nada */
     if (!estaPantallaCompleta()) {
       const pedir = fsRoot.requestFullscreen || fsRoot.webkitRequestFullscreen;
-      if (pedir) pedir.call(fsRoot).catch(() => {});
+      pedir.call(fsRoot).catch(() => {});
     } else {
       const salir = document.exitFullscreen || document.webkitExitFullscreen;
-      if (salir) salir.call(document).catch(() => {});
+      salir.call(document).catch(() => {});
+    }
+  }
+
+  /* Detección de doble toque (2 toques seguidos en menos de 450ms) */
+  const clockBox = document.querySelector(".clock-box");
+  let ultimoToque = 0;
+  clockBox.addEventListener("click", () => {
+    const ahora = new Date().getTime();
+    if (ahora - ultimoToque < 450) {
+      alternarPantallaCompleta();
+      ultimoToque = 0;
+    } else {
+      ultimoToque = ahora;
     }
   });
-  /* iPhone Safari (en el navegador) no permite pantalla completa: ocultar botón */
-  if (!fsRoot.requestFullscreen && !fsRoot.webkitRequestFullscreen) {
-    fsBtn.style.display = "none";
-  }
 
   /* ═════════════════════════════════════════════════════════════════*/
   /* ABRIR PANEL CON UN TAP (finger/cursor sobre la foto o la tarjeta) */
