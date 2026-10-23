@@ -1,10 +1,12 @@
-const CACHE_NAME = "tiu-cache-v1";
+const CACHE_NAME = "tiu-cache-v2";
 
 // Archivos clave que se guardarán en el celular para funcionar sin internet
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
-  "./manifest.json"
+  "./manifest.json",
+  "./icon-192.png",
+  "./icon-512.png"
 ];
 
 // Instalación: Guarda los archivos en caché

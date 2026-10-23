@@ -9,16 +9,22 @@
   "orientation": "portrait",
   "icons": [
     {
-      "src": "https://play-lh.googleusercontent.com/qqsVK3Js4KMiVjd1Q7Rq2XDD-VZW2Kt9FxAEz7qxuiQAIMJa8ctoFeKH4m8Al4h-0RQ=w240-h480-rw",
+      "src": "icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
-      "src": "https://play-lh.googleusercontent.com/qqsVK3Js4KMiVjd1Q7Rq2XDD-VZW2Kt9FxAEz7qxuiQAIMJa8ctoFeKH4m8Al4h-0RQ=w240-h480-rw",
+      "src": "icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }
